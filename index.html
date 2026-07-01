@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trade Calculator Dashboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0b0e14;
+            color: #e0e3eb;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 8px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 6px;
+            margin-bottom: 6px;
+        }
+
+        h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+
+        .version-tag {
+            font-size: 0.65rem;
+            background: #1e2633;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #848e9c;
+        }
+
+        .card {
+            background: #141a24;
+            border: 1px solid #222b3d;
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        h2 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: #848e9c;
+            font-weight: 500;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            background: #1e2633;
+            border: 1px solid #2d384c;
+            border-radius: 6px;
+            color: #ffffff;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            width: 100%;
+            outline: none;
+            height: 34px;
+        }
+
+        input[type="number"]:focus {
+            border-color: #3b82f6;
+        }
+
+        input[type="number"]::placeholder {
+            color: #4b586c;
+            font-size: 0.8rem;
+        }
+
+        button {
+            background: #1e2633;
+            border: 1px solid #2d384c;
+            color: #e0e3eb;
+            border-radius: 6px;
+            padding: 0 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-clear {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            font-weight: 600;
+        }
+
+        .btn-copy {
+            background: #2563eb;
+            border: 1px solid #3b82f6;
+            color: #ffffff;
+            height: 24px;
+            padding: 0 8px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .result-container {
+            background: #1a2230;
+            border-radius: 8px;
+            padding: 2px 4px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 6px;
+            border-bottom: 1px solid #222b3d;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .item-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #848e9c;
+            width: 75px;
+            display: inline-block;
+        }
+
+        .grid-split {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .grid-split .card {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .blue-text { color: #3b82f6; }
+        .green-text { color: #00c087; }
+        .red-text { color: #ff4a5a; }
+        .yellow-text { color: #f59e0b; }
+
+        .qty-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 6px;
+            background: #1a2230;
+            border: 1px solid #222b3d;
+            padding: 6px;
+            border-radius: 8px;
+        }
+
+        .qty-badge-box {
+            background: #1e2633;
+            border: 1px solid #2d384c;
+            height: 28px;
+            width: 48%;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .toast {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50px);
+            background: #00c087;
+            color: #ffffff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            transition: transform 0.2s ease, opacity 0.2s;
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .avg-scroll-area {
+            max-height: 140px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        .avg-scroll-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        .avg-scroll-area::-webkit-scrollbar-thumb {
+            background: #2d384c;
+            border-radius: 10px;
+        }
+
+        .avg-summary-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: #1a2230;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-top: 4px;
+        }
+
+        .avg-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #848e9c;
+        }
+
+        .avg-summary-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+        }
+
+        /* Footer Branding styles */
+        .footer-branding {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 0 6px 0;
+            font-size: 0.75rem;
+            color: #848e9c;
+            font-weight: 500;
+        }
+
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            color: #848e9c;
+            transition: color 0.2s ease;
+        }
+
+        .github-link:hover {
+            color: #ffffff;
+        }
+
+        .github-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            color: #848e9c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast" id="toast">✓ Copied</div>
+
+    <div class="header-bar">
+        <h1>Trade Calculator</h1>
+        <div class="version-tag">All-In-One Screen</div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>0.5% + 6% Calculator</h2>
+            <div class="subtitle">Share Price</div>
+        </div>
+        <div class="input-row">
+            <input type="number" id="amt1" placeholder="Enter Price" oninput="calc1()" inputmode="decimal">
+            <button class="btn-clear" onclick="clearCalc1()">Clear</button>
+        </div>
+        
+        <div class="result-container">
+            <div class="result-item blue-text">
+                <div class="result-value"><span class="item-label">0.5% (Buy)</span>₹<span id="r1">0.00</span></div>
+            </div>
+            <div class="result-item green-text">
+                <div class="result-value"><span class="item-label">6% (Target)</span>₹<span id="r2">0.00</span></div>
+                <button class="btn-copy" style="background:#1e2633; border-color:#2d384c; color:#e0e3eb;" onclick="copyValue('H ₹' + document.getElementById('amt1').value + ' | B ₹' + document.getElementById('r1').innerText + ' | T ₹' + document.getElementById('r2').innerText)">Copy</button>
+            </div>
+        </div>
+
+        <div class="qty-box">
+            <input type="number" id="amt3" placeholder="Investment Amount" oninput="calc3()" inputmode="decimal" style="width: 48%; height: 28px; font-size: 0.65rem; padding: 4px 8px; margin: 0;">
+            <div class="qty-badge-box" style="color: #848e9c;">
+                <span>Quantity:</span>
+                <span id="r5" class="red-text" style="font-family:'JetBrains Mono'; font-weight:700; font-size:0.8rem; margin: 0; padding: 0;">0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>±2.75% Calculator</h2>
+            <div class="subtitle">Buy / Avg. Price</div>
+        </div>
+        <div class="input-row">
+            <input type="number" id="amt2" placeholder="Enter Entry Price" oninput="calc2()" inputmode="decimal">
+            <button class="btn-clear" onclick="clearCalc2()">Clear</button>
+        </div>
+
+        <div class="result-container">
+            <div class="result-item red-text">
+                <div class="result-value"><span class="item-label">2.75% -</span>₹<span id="r4">0.00</span></div>
+            </div>
+            <div class="result-item green-text">
+                <div class="result-value"><span class="item-label">2.75% +</span>₹<span id="r3">0.00</span></div>
+                <button class="btn-copy" style="background:#1e2633; border-color:#2d384c; color:#e0e3eb;" onclick="copyValue('IR = ( ₹' + document.getElementById('r4').innerText + ' - ₹' + document.getElementById('r3').innerText + ' )')">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-split">
+        <div class="card">
+            <div class="card-header">
+                <h2>% Calculator</h2>
+            </div>
+            <div style="display: flex; gap: 4px; margin-bottom: 6px;">
+                <input type="number" id="perc1" placeholder="V1" oninput="calc4()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+                <input type="number" id="perc2" placeholder="%" oninput="calc4()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+                <button id="btn-perc-plus" style="height:28px; width:28px; padding:0; font-size:1rem; font-weight:bold; background:#2563eb; border-color:#3b82f6; color:#ffffff;" onclick="togglePercSign('+')">+</button>
+                <button id="btn-perc-minus" style="height:28px; width:28px; padding:0; font-size:1rem; font-weight:bold; background:#1e2633; border-color:#2d384c; color:#e0e3eb;" onclick="togglePercSign('-')">-</button>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1a2230; padding:4px 6px; border-radius:6px;">
+                <span id="r6" class="blue-text" style="font-family:'JetBrains Mono'; font-weight:700; font-size:0.85rem; white-space: nowrap;">0.00 / 0.00</span>
+                <button style="height:22px; padding:0 6px; font-size:0.7rem; background:transparent; border:none; color:#f87171;" onclick="clearCalc4()">Clear</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Divide Calculator</h2>
+            </div>
+            <div style="display: flex; gap: 4px; margin-bottom: 6px;">
+                <input type="number" id="div1" placeholder="V1" oninput="calc5()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+                <input type="number" id="div2" placeholder="V2" oninput="calc5()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1a2230; padding:4px 6px; border-radius:6px;">
+                <span id="r7" class="green-text" style="font-family:'JetBrains Mono'; font-weight:700; font-size:0.9rem;">0.00</span>
+                <button style="height:22px; padding:0 6px; font-size:0.7rem; background:transparent; border:none; color:#f87171;" onclick="clearCalc5()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <h2>Avg. Price Calculator</h2>
+            <button id="add-row-btn" style="height:22px; padding:0 8px; font-size:0.7rem; background:#2563eb; border-color:#3b82f6; color:#fff;" onclick="addAvgRow()">+ Add Row</button>
+        </div>
+        
+        <div class="avg-scroll-area" id="avg-inputs-container">
+            <div class="input-row avg-row" style="margin-bottom: 4px;">
+                <input type="number" class="avg-p" placeholder="Price" oninput="calcAvg()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+                <input type="number" class="avg-q" placeholder="Quantity" oninput="calcAvg()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+            </div>
+        </div>
+
+        <div class="avg-summary-container">
+            <div class="avg-summary-row">
+                <span>Total Investment:</span>
+                <span id="rAvgInv" class="blue-text avg-summary-val">₹0.00</span>
+            </div>
+            <div class="avg-summary-row">
+                <span>Total Quantity:</span>
+                <span id="rAvgQty" class="green-text avg-summary-val">0.00</span>
+            </div>
+            <div class="avg-summary-row" style="margin-top: 2px; padding-top: 4px; border-top: 1px dashed #222b3d;">
+                <span style="color: #ffffff; font-weight: 600;">Avg Price:</span>
+                <span id="rAvg" class="yellow-text avg-summary-val" style="font-size: 0.9rem;">₹0.00</span>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 2px;">
+                <button style="height:18px; padding:0; font-size:0.7rem; background:transparent; border:none; color:#f87171;" onclick="clearAvg()">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-branding">
+        <span>Made With ❤️ by Harry</span>
+        <a class="github-link" href="https://github.com/TradeCalculator" target="_blank" rel="noopener noreferrer" title="View GitHub Profile">
+            <svg class="github-icon" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+            </svg>
+        </a>
+    </div>
+
+    <script>
+        const DOM = {
+            amt1: document.getElementById("amt1"),
+            amt2: document.getElementById("amt2"),
+            amt3: document.getElementById("amt3"),
+            perc1: document.getElementById("perc1"),
+            perc2: document.getElementById("perc2"),
+            div1: document.getElementById("div1"),
+            div2: document.getElementById("div2"),
+            avgContainer: document.getElementById("avg-inputs-container"),
+            r1: document.getElementById("r1"),
+            r2: document.getElementById("r2"),
+            r3: document.getElementById("r3"),
+            r4: document.getElementById("r4"),
+            r5: document.getElementById("r5"),
+            r6: document.getElementById("r6"),
+            r7: document.getElementById("r7"),
+            rAvg: document.getElementById("rAvg"),
+            rAvgInv: document.getElementById("rAvgInv"),
+            rAvgQty: document.getElementById("rAvgQty"),
+            toast: document.getElementById('toast'),
+            btnPlus: document.getElementById("btn-perc-plus"),
+            btnMinus: document.getElementById("btn-perc-minus")
+        };
+
+        let toastTimeout;
+        let currentPercSign = '+';
+
+        function calc1(){
+            let a = Number(DOM.amt1.value) || 0;
+            let b = a + a * 0.5 / 100;
+            let t = b + b * 6 / 100;
+            
+            DOM.r1.innerText = b.toFixed(2);
+            DOM.r2.innerText = t.toFixed(2);
+            calc3(); 
+        }
+
+        function calc2(){
+            let a = Number(DOM.amt2.value) || 0;
+            DOM.r3.innerText = (a + a * 2.75 / 100).toFixed(2);
+            DOM.r4.innerText = (a - a * 2.75 / 100).toFixed(2);
+        }
+
+        function calc3(){
+            let manual = Number(DOM.amt3.value) || 0;
+            let b = Number(DOM.r1.innerText) || 0;
+            DOM.r5.innerText = (b > 0) ? (manual / b).toFixed(2) : "0.00";
+        }
+
+        function clearCalc1(){
+            DOM.amt1.value = "";
+            DOM.amt3.value = "";
+            DOM.r1.innerText = "0.00";
+            DOM.r2.innerText = "0.00";
+            DOM.r5.innerText = "0.00";
+        }
+
+        function clearCalc2(){
+            DOM.amt2.value = "";
+            DOM.r3.innerText = "0.00";
+            DOM.r4.innerText = "0.00";
+        }
+
+        function togglePercSign(sign) {
+            currentPercSign = sign;
+            if (sign === '+') {
+                DOM.btnPlus.style.background = "#2563eb";
+                DOM.btnPlus.style.borderColor = "#3b82f6";
+                DOM.btnPlus.style.color = "#ffffff";
+
+                DOM.btnMinus.style.background = "#1e2633";
+                DOM.btnMinus.style.borderColor = "#2d384c";
+                DOM.btnMinus.style.color = "#e0e3eb";
+
+                // Return color context to default blue class
+                DOM.r6.className = "blue-text";
+            } else {
+                DOM.btnMinus.style.background = "#ff4a5a";
+                DOM.btnMinus.style.borderColor = "#ff4a5a";
+                DOM.btnMinus.style.color = "#ffffff";
+
+                DOM.btnPlus.style.background = "#1e2633";
+                DOM.btnPlus.style.borderColor = "#2d384c";
+                DOM.btnPlus.style.color = "#e0e3eb";
+
+                // Update text color class list dynamically to red on click
+                DOM.r6.className = "red-text";
+            }
+            calc4();
+        }
+
+        function calc4(){
+            let a = Number(DOM.perc1.value) || 0;
+            let p = Number(DOM.perc2.value) || 0;
+            let onlyPerc = a * p / 100;
+            let totalVal = (currentPercSign === '+') ? (a + onlyPerc) : (a - onlyPerc);
+            DOM.r6.innerText = onlyPerc.toFixed(2) + " / " + totalVal.toFixed(2);
+        }
+
+        function clearCalc4(){
+            DOM.perc1.value = "";
+            DOM.perc2.value = "";
+            DOM.r6.innerText = "0.00 / 0.00";
+            // Return to base color scheme logic on content wash
+            DOM.r6.className = "blue-text";
+        }
+
+        function calc5(){
+            let a = Number(DOM.div1.value) || 0;
+            let b = Number(DOM.div2.value) || 0;
+            DOM.r7.innerText = (b !== 0 ? (a / b).toFixed(2) : "0.00");
+        }
+
+        function clearCalc5() {
+            DOM.div1.value = ''; 
+            DOM.div2.value = ''; 
+            DOM.r7.innerText = '0.00';
+        }
+
+        function addAvgRow() {
+            const div = document.createElement("div");
+            div.className = "input-row avg-row";
+            div.style.marginBottom = "4px";
+            div.innerHTML = `
+                <input type="number" class="avg-p" placeholder="Price" oninput="calcAvg()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+                <input type="number" class="avg-q" placeholder="Quantity" oninput="calcAvg()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+            `;
+            DOM.avgContainer.appendChild(div);
+            DOM.avgContainer.scrollTop = DOM.avgContainer.scrollHeight;
+        }
+
+        function calcAvg() {
+            const prices = document.querySelectorAll(".avg-p");
+            const qtys = document.querySelectorAll(".avg-q");
+            
+            let totalInvestment = 0;
+            let totalQuantity = 0;
+
+            for(let i = 0; i < prices.length; i++) {
+                let p = Number(prices[i].value) || 0;
+                let q = Number(qtys[i].value) || 0;
+                
+                totalInvestment += (p * q);
+                totalQuantity += q;
+            }
+
+            DOM.rAvgInv.innerText = "₹" + totalInvestment.toFixed(2);
+            DOM.rAvgQty.innerText = totalQuantity.toFixed(2);
+
+            if (totalQuantity !== 0) {
+                DOM.rAvg.innerText = "₹" + (totalInvestment / totalQuantity).toFixed(2);
+            } else {
+                DOM.rAvg.innerText = "₹0.00";
+            }
+        }
+
+        function clearAvg() {
+            DOM.avgContainer.innerHTML = `
+                <div class="input-row avg-row" style="margin-bottom: 4px;">
+                    <input type="number" class="avg-p" placeholder="Price" oninput="calcAvg()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+                    <input type="number" class="avg-q" placeholder="Quantity" oninput="calcAvg()" style="height:28px; padding: 2px 6px;" inputmode="decimal">
+                </div>
+            `;
+            DOM.rAvgInv.innerText = "₹0.00";
+            DOM.rAvgQty.innerText = "0.00";
+            DOM.rAvg.innerText = "₹0.00";
+        }
+
+        async function copyValue(txt){
+            try {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(txt);
+                    showToast();
+                } else {
+                    fallbackCopyText(txt);
+                }
+            } catch (err) {
+                fallbackCopyText(txt);
+            }
+        }
+
+        function fallbackCopyText(txt) {
+            const temp = document.createElement("textarea");
+            temp.value = txt;
+            Object.assign(temp.style, {
+                position: "fixed",
+                top: "0", left: "0", opacity: "0"
+            });
+            document.body.appendChild(temp);
+            temp.select();
+            try {
+                document.execCommand("copy");
+                showToast();
+            } catch (err) {
+                console.error("Copy alternative failure:", err);
+            }
+            document.body.removeChild(temp);
+        }
+
+        function showToast(){
+            clearTimeout(toastTimeout);
+            DOM.toast.classList.add('show');
+            toastTimeout = setTimeout(() => { DOM.toast.classList.remove('show'); }, 1200);
+        }
+    </script>
+</body>
+</html>
